@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>车辆故障智能诊断 · 三路证据融合</title>
+<style>
+  /* ==========================================================================
+     设计说明
+     - 左侧深色导航栏（汽车/工业气质）+ 右侧浅色内容区（长时间阅读 md 报告不刺眼）
+     - 颜色：主色 #1e6feb（科技蓝），辅助 #0ea5a4（青），警示 #f59e0b，错误 #ef4444
+     - 全部手写，无任何 CDN 依赖，断网也能正常展示
+     ========================================================================== */
+  :root {
+    --bg: #eef2f7;
+    --panel: #ffffff;
+    --ink: #0f172a;
+    --ink-2: #475569;
+    --ink-3: #94a3b8;
+    --line: #e2e8f0;
+    --brand: #1e6feb;
+    --brand-soft: #e8f0fe;
+    --teal: #0ea5a4;
+    --teal-soft: #e6f7f6;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --ok: #16a34a;
+    --sidebar: #0f1b2d;
+    --sidebar-2: #16263d;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .06);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  a { color: var(--brand); }
+
+  /* ---------- 布局 ---------- */
+  .layout { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ---------- 侧边栏 ---------- */
+  .sidebar {
+    width: 268px;
+    flex: 0 0 268px;
+    background: linear-gradient(180deg, var(--sidebar) 0%, #0b1524 100%);
+    color: #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 14px;
+    gap: 14px;
+    overflow-y: auto;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 6px 0; }
+  .brand-mark {
+    width: 36px; height: 36px; border-radius: 11px;
+    background: linear-gradient(135deg, var(--brand), var(--teal));
+    display: grid; place-items: center; flex: 0 0 auto;
+  }
+  .brand-mark svg { width: 20px; height: 20px; }
+  .brand-text b { display: block; color: #f8fafc; font-size: 15px; letter-spacing: .3px; }
+  .brand-text span { font-size: 11px; color: #7c8ea8; }
+
+  .new-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 11px 12px; border-radius: 11px; border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06); color: #e2e8f0; font-size: 13.5px; font-weight: 600;
+    transition: .16s;
+  }
+  .new-btn:hover { background: rgba(30, 111, 235, .28); border-color: rgba(30,111,235,.55); }
+
+  .side-title {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: #6b7f9c; padding: 6px 6px 0;
+  }
+  .side-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .example {
+    text-align: left; padding: 9px 11px; border-radius: 10px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+    color: #b6c4d8; font-size: 12.5px; line-height: 1.45; transition: .16s;
+  }
+  .example:hover { background: rgba(255,255,255,.09); color: #fff; border-color: rgba(255,255,255,.16); }
+
+  .session {
+    text-align: left; padding: 8px 11px; border-radius: 10px; border: none;
+    background: transparent; color: #9fb0c6; font-size: 12.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .session:hover { background: rgba(255,255,255,.07); color: #fff; }
+
+  .side-foot { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .status-row { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: #8fa1b8; padding: 3px 6px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #64748b; flex: 0 0 auto; }
+  .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px rgba(22,163,74,.18); }
+  .dot.bad { background: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.16); }
+
+  .demo-toggle {
+    display: flex; align-items: center; gap: 9px; margin-top: 10px; padding: 8px 10px;
+    border-radius: 10px; background: rgba(14,165,164,.12); border: 1px solid rgba(14,165,164,.28);
+    font-size: 12px; color: #7fe3e0; cursor: pointer; user-select: none;
+  }
+  .demo-toggle input { accent-color: var(--teal); }
+
+  /* ---------- 主区 ---------- */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  .topbar {
+    height: 60px; flex: 0 0 60px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 26px; background: rgba(255,255,255,.78); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar h1 { font-size: 15px; margin: 0; font-weight: 650; letter-spacing: .2px; }
+  .topbar .crumb { font-size: 12px; color: var(--ink-3); margin-left: 10px; font-weight: 400; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--ink-3); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+    background: var(--brand-soft); color: var(--brand); font-size: 11.5px; font-weight: 600;
+  }
+  .pill.gray { background: #f1f5f9; color: var(--ink-2); }
+
+  .scroll { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+  .inner { max-width: 920px; margin: 0 auto; padding: 26px 26px 150px; }
+
+  /* ---------- 空态 ---------- */
+  .hero { text-align: center; padding: 54px 0 30px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow);
+    font-size: 12px; color: var(--ink-2); margin-bottom: 20px;
+  }
+  .hero h2 { font-size: 30px; margin: 0 0 12px; letter-spacing: -.5px; line-height: 1.25; }
+  .hero h2 em { font-style: normal; background: linear-gradient(120deg, var(--brand), var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { margin: 0 auto; max-width: 560px; color: var(--ink-2); font-size: 14px; line-height: 1.75; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 34px; }
+  .card {
+    text-align: left; padding: 16px; border-radius: 14px; background: var(--panel);
+    border: 1px solid var(--line); box-shadow: var(--shadow); transition: .18s;
+  }
+  .card:hover { transform: translateY(-2px); border-color: #c7d7f7; box-shadow: 0 10px 28px rgba(30,111,235,.12); }
+  .card .card-icon { font-size: 18px; }
+  .card b { display: block; margin: 8px 0 5px; font-size: 13.5px; }
+  .card span { font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+
+  /* ---------- 消息 ---------- */
+  .msg { margin-bottom: 22px; }
+  .msg.user { display: flex; justify-content: flex-end; }
+  .bubble-user {
+    max-width: 78%; padding: 12px 16px; border-radius: 16px 16px 4px 16px;
+    background: linear-gradient(135deg, #1e6feb, #2b8bf5); color: #fff;
+    font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+    box-shadow: 0 6px 18px rgba(30,111,235,.24);
+  }
+
+  .card-answer {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+
+  /* ---------- 阶段步骤条 ---------- */
+  .steps-wrap { padding: 16px 18px 12px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+  .steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .step {
+    flex: 1 1 120px; min-width: 108px; display: flex; align-items: flex-start; gap: 9px;
+    padding: 9px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line);
+    transition: .2s;
+  }
+  .step-dot {
+    width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center;
+    font-size: 11px; font-weight: 700; background: #eef2f7; color: var(--ink-3); border: 1px solid var(--line);
+  }
+  .step-name { font-size: 12.5px; font-weight: 600; color: var(--ink-2); line-height: 1.3; }
+  .step-detail { font-size: 11px; color: var(--ink-3); margin-top: 3px; line-height: 1.4; word-break: break-word; }
+  .step.running { border-color: #bcd4fb; background: #f5f9ff; }
+  .step.running .step-dot { background: var(--brand); border-color: var(--brand); color: #fff; animation: pulse 1.15s infinite; }
+  .step.running .step-name { color: var(--brand); }
+  .step.done .step-dot { background: var(--teal-soft); border-color: #9fe0de; color: #0d8f8e; }
+  .step.done .step-name { color: var(--ink); }
+  .step.error .step-dot { background: #fdecec; border-color: #f7c4c4; color: var(--danger); }
+  .step.error .step-name { color: var(--danger); }
+  .step.skip { opacity: .55; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1 } 50% { transform: scale(.86); opacity: .7 } }
+
+  /* ---------- 回答正文 ---------- */
+  .answer-body { padding: 20px 24px 8px; font-size: 14.5px; line-height: 1.85; color: #1e293b; }
+  .answer-body:empty { display: none; }
+  .answer-body h1 { font-size: 22px; margin: 20px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  .answer-body h2 { font-size: 18px; margin: 22px 0 10px; padding-left: 10px; border-left: 3px solid var(--brand); }
+  .answer-body h3 { font-size: 15.5px; margin: 18px 0 8px; color: #0f172a; }
+  .answer-body h4, .answer-body h5, .answer-body h6 { font-size: 14px; margin: 14px 0 6px; }
+  .answer-body p { margin: 9px 0; }
+  .answer-body ul, .answer-body ol { margin: 9px 0; padding-left: 22px; }
+  .answer-body li { margin: 5px 0; }
+  .answer-body strong { color: #0b1220; }
+  .answer-body code {
+    font-family: var(--mono); font-size: 12.5px; background: #f1f5f9;
+    padding: 2px 6px; border-radius: 5px; color: #b91c1c; border: 1px solid #e8edf5;
+  }
+  .answer-body pre {
+    background: #0f1b2d; color: #e2e8f0; padding: 14px 16px; border-radius: 11px;
+    overflow-x: auto; font-size: 12.5px; line-height: 1.65; margin: 12px 0;
+  }
+  .answer-body pre code { background: none; border: none; color: inherit; padding: 0; }
+  .answer-body blockquote {
+    margin: 12px 0; padding: 10px 14px; border-left: 3px solid var(--teal);
+    background: var(--teal-soft); color: #0f766e; border-radius: 0 8px 8px 0; font-size: 13.5px;
+  }
+  .answer-body blockquote p { margin: 3px 0; }
+  .answer-body hr { border: none; border-top: 1px dashed var(--line); margin: 18px 0; }
+  .answer-body table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  .answer-body th, .answer-body td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  .answer-body th { background: #f8fafc; font-weight: 650; }
+  .answer-body tr:nth-child(even) td { background: #fcfdff; }
+
+  .caret { display: inline-block; width: 7px; height: 15px; background: var(--brand); border-radius: 1px; vertical-align: -2px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0 } }
+
+  /* ---------- 证据面板 ---------- */
+  .evidence { border-top: 1px solid var(--line); background: #fbfcfe; }
+  .ev-head {
+    display: flex; align-items: center; gap: 8px; padding: 11px 18px;
+    font-size: 13px; font-weight: 600; color: var(--ink-2); cursor: pointer; user-select: none;
+  }
+  .ev-head .chev { transition: .2s; color: var(--ink-3); }
+  .evidence.open .ev-head .chev { transform: rotate(90deg); }
+  .ev-body { display: none; padding: 0 18px 16px; }
+  .evidence.open .ev-body { display: block; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .tab {
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
+    font-size: 12px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tab .cnt { background: #eef2f7; color: var(--ink-2); border-radius: 999px; padding: 0 6px; font-size: 10.5px; }
+  .tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .tab.active .cnt { background: rgba(255,255,255,.24); color: #fff; }
+
+  .ev-list { display: grid; gap: 9px; }
+  .ev-item { background: #fff; border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; }
+  .ev-item .ev-title { font-size: 13px; font-weight: 650; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ev-item .ev-meta { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+  .ev-item .ev-text { font-size: 12.5px; color: var(--ink-2); line-height: 1.65; margin-top: 7px; }
+  .ev-item .ev-kv { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; margin-top: 6px; }
+  .ev-item .ev-kv b { color: var(--ink); font-weight: 600; }
+  .score {
+    font-family: var(--mono); font-size: 10.5px; padding: 1px 7px; border-radius: 999px;
+    background: var(--teal-soft); color: #0d8f8e; font-weight: 600;
+  }
+  .tag { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: #f1f5f9; color: var(--ink-2); }
+  .empty-hint { font-size: 12.5px; color: var(--ink-3); padding: 6px 2px; }
+
+  /* ---------- 回答底部 ---------- */
+  .answer-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 18px; border-top: 1px solid var(--line); background: #fff; flex-wrap: wrap;
+  }
+  .foot-meta { display: flex; gap: 14px; font-size: 11.5px; color: var(--ink-3); flex-wrap: wrap; }
+  .foot-actions { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 9px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink-2); font-size: 12.5px;
+    font-weight: 550; transition: .16s; text-decoration: none;
+  }
+  .btn:hover { border-color: #bcd4fb; color: var(--brand); background: #f5f9ff; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.primary:hover { background: #1a5fd0; color: #fff; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ---------- 输入区 ---------- */
+  .composer-wrap {
+    position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(238,242,247,0) 0%, var(--bg) 42%);
+    padding: 12px 26px 20px;
+  }
+  .composer {
+    max-width: 920px; margin: 0 auto; background: #fff; border: 1px solid var(--line);
+    border-radius: 16px; box-shadow: var(--shadow); padding: 12px 14px;
+    transition: .2s; display: flex; align-items: flex-end; gap: 10px;
+  }
+  .composer:focus-within { border-color: #b6cffa; box-shadow: 0 0 0 4px rgba(30,111,235,.09), var(--shadow); }
+  .composer textarea {
+    flex: 1; border: none; outline: none; resize: none; font-size: 14px; line-height: 1.7;
+    font-family: inherit; color: var(--ink); background: transparent; max-height: 168px; min-height: 46px;
+    padding: 8px 2px;
+  }
+  .composer textarea::placeholder { color: var(--ink-3); }
+  .send {
+    width: 42px; height: 42px; border-radius: 12px; border: none; flex: 0 0 auto;
+    background: linear-gradient(135deg, var(--brand), #3b82f6); color: #fff;
+    display: grid; place-items: center; transition: .16s;
+  }
+  .send:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(30,111,235,.3); }
+  .send:disabled { opacity: .45; cursor: not-allowed; }
+  .composer-tip { max-width: 920px; margin: 8px auto 0; text-align: center; font-size: 11px; color: var(--ink-3); }
+
+  /* ---------- 提示 ---------- */
+  .toast {
+    position: fixed; right: 22px; bottom: 22px; z-index: 90; max-width: 380px;
+    background: #1e293b; color: #fff; padding: 12px 15px; border-radius: 11px;
+    font-size: 12.5px; line-height: 1.6; box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    opacity: 0; transform: translateY(10px); pointer-events: none; transition: .25s;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.error { background: #b91c1c; }
+
+  .warn-banner {
+    margin: 0 0 12px; padding: 9px 13px; border-radius: 10px; font-size: 12.5px;
+    background: #fffbeb; border: 1px solid #fde68a; color: #92400e; line-height: 1.6;
+  }
+
+  /* 滚动条 */
+  .scroll::-webkit-scrollbar, .sidebar::-webkit-scrollbar { width: 8px; }
+  .scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 8px; }
+
+  @media (max-width: 860px) {
+    .sidebar { display: none; }
+    .inner { padding: 18px 14px 190px; }
+    .hero h2 { font-size: 23px; }
+    .composer-wrap { padding: 10px 14px 16px; }
+    .steps { gap: 5px; }
+    .step { min-width: 92px; padding: 7px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ================= 侧边栏 ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 17h14M6.5 17a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm14 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+          <path d="M3 17V11l2.2-4.4A2 2 0 0 1 7 5.5h10a2 2 0 0 1 1.8 1.1L21 11v6"/>
+          <path d="M3 11h18"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <b>车辆故障智能诊断</b>
+        <span>三路证据融合 · Multi-Evidence RAG</span>
+      </div>
+    </div>
+
+    <button class="new-btn" id="newChat">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      新建诊断
+    </button>
+
+    <div class="side-title">示例问题</div>
+    <div class="side-group" id="examples"></div>
+
+    <div class="side-title">历史会话</div>
+    <div class="side-group" id="sessions">
+      <div style="font-size:12px;color:#6b7f9c;padding:0 8px">加载中…</div>
+    </div>
+
+    <div class="side-foot">
+      <div id="statusList">
+        <div class="status-row"><span class="dot"></span>检测中…</div>
+      </div>
+      <label class="demo-toggle" title="演示模式不连接数据库与大模型，使用内置样例数据">
+        <input type="checkbox" id="demoToggle" />
+        演示模式（不连库）
+      </label>
+    </div>
+  </aside>
+
+  <!-- ================= 主区 ================= -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center">
+        <h1>故障诊断</h1>
+        <span class="crumb">向量库 · 投诉库 · 网络检索</span>
+      </div>
+      <div class="topbar-right">
+        <span class="pill gray" id="sessionPill">新会话</span>
+        <a class="pill" href="/docs" target="_blank" rel="noopener">API 文档</a>
+      </div>
+    </div>
+
+    <div class="scroll" id="scroll">
+      <div class="inner" id="inner">
+        <!-- 空态 -->
+        <div id="hero">
+          <div class="hero">
+            <div class="hero-badge">
+              <span class="dot ok"></span> 三路证据 · 可溯源诊断
+            </div>
+            <h2>用一句话描述故障，<em>拿到可溯源的诊断报告</em></h2>
+            <p>
+              系统会同时检索 <b>OBD 故障码知识库</b>、<b>同车型投诉案例库</b> 和 <b>公开网络信息</b>，
+              再由大模型融合成一份带证据来源、检查步骤和维修建议的报告。
+            </p>
+            <div class="cards" id="heroCards"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea id="input" rows="1" placeholder="例如：我的速腾怠速时车身明显抖动，加速无力，故障灯亮了，油耗也变高了"></textarea>
+        <button class="send" id="send" title="发送（Ctrl + Enter）">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="composer-tip">AI 生成的诊断建议仅供参考，安全相关问题请以现场专业检测为准</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================================
+   1. 全局状态
+   ========================================================================== */
+const state = {
+  sessionId: "",
+  streaming: false,
+  demo: false,
+  evidence: { vector: [], sql: [], web: [] },
+  activeTab: "vector",
+  examples: [
+    "我的速腾怠速时车身明显抖动，加速无力，故障灯亮了，油耗也变高了",
+    "小米YU7多个车门内侧边缘出现鼓泡爆漆，能查到是不是通病吗",
+    "冷车启动困难，启动后转速忽高忽低，热车后就正常了",
+    "行驶中发动机故障灯闪烁，感觉动力突然下降"
+  ]
+};
+
+const $ = (id) => document.getElementById(id);
+const scrollBox = $("scroll");
+const inner = $("inner");
+
+/* ==========================================================================
+   2. 极简 Markdown 渲染器
+   - 只用正则 + 行扫描，无第三方依赖，断网可用
+   - 支持：标题 / 粗斜体 / 行内代码 / 代码块 / 引用 / 有序无序列表 / 表格 / 分割线 / 链接
+   - 流式渲染时容忍「半截语法」（比如只写了一半的 ** ），不会崩
+   ========================================================================== */
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function inlineMd(text) {
+  let s = escapeHtml(text);
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  return s;
+}
+
+function renderMarkdown(md) {
+  if (!md) return "";
+  const lines = String(md).replace(/\r\n/g, "\n").split("\n");
+  const out = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // 代码块
+    const fence = line.match(/^\s*```\s*([\w+-]*)\s*$/);
+    if (fence) {
+      const lang = fence[1] || "";
+      const buf = [];
+      i++;
+      while (i < lines.length && !/^\s*```\s*$/.test(lines[i])) { buf.push(lines[i]); i++; }
+      i++; // 跳过结束围栏
+      out.push(`<pre><code data-lang="${escapeHtml(lang)}">${escapeHtml(buf.join("\n"))}</code></pre>`);
+      continue;
+    }
+
+    // 空行
+    if (!line.trim()) { i++; continue; }
+
+    // 分割线
+    if (/^\s*([-*_])\s*\1\s*\1[\s\1]*$/.test(line)) { out.push("<hr />"); i++; continue; }
+
+    // 标题
+    const h = line.match(/^\s{0,3}(#{1,6})\s+(.*)$/);
+    if (h) { out.push(`<h${h[1].length}>${inlineMd(h[2].trim())}</h${h[1].length}>`); i++; continue; }
+
+    // 引用（连续多行合并）
+    if (/^\s*>\s?/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^\s*>\s?/.test(lines[i])) { buf.push(lines[i].replace(/^\s*>\s?/, "")); i++; }
+      out.push(`<blockquote>${renderMarkdown(buf.join("\n"))}</blockquote>`);
+      continue;
+    }
+
+    // 表格：当前行含 | 且下一行是分隔行
+    if (line.includes("|") && i + 1 < lines.length && /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(lines[i + 1])) {
+      const parseRow = (row) => row.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map((c) => c.trim());
+      const head = parseRow(line);
+      const align = parseRow(lines[i + 1]).map((c) => {
+        if (/^:-+:$/.test(c)) return "center";
+        if (/^:-+$/.test(c)) return "left";
+        if (/^-+:$/.test(c)) return "right";
+        return "";
+      });
+      i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].includes("|") && lines[i].trim()) { rows.push(parseRow(lines[i])); i++; }
+      const th = head.map((c, k) => `<th${align[k] ? ` style="text-align:${align[k]}"` : ""}>${inlineMd(c)}</th>`).join("");
+      const tb = rows.map((r) => "<tr>" + r.map((c, k) => `<td${align[k] ? ` style="text-align:${align[k]}"` : ""}>${inlineMd(c)}</td>`).join("") + "</tr>").join("");
+      out.push(`<table><thead><tr>${th}</tr></thead><tbody>${tb}</tbody></table>`);
+      continue;
+    }
+
+    // 有序列表
+    if (/^\s*\d+[.)]\s+/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])) { buf.push(`<li>${inlineMd(lines[i].replace(/^\s*\d+[.)]\s+/, ""))}</li>`); i++; }
+      out.push(`<ol>${buf.join("")}</ol>`);
+      continue;
+    }
+
+    // 无序列表
+    if (/^\s*[-*+]\s+/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) { buf.push(`<li>${inlineMd(lines[i].replace(/^\s*[-*+]\s+/, ""))}</li>`); i++; }
+      out.push(`<ul>${buf.join("")}</ul>`);
+      continue;
+    }
+
+    // 普通段落（连续非空行合并）
+    const buf = [];
+    while (i < lines.length && lines[i].trim() && !/^\s*(#{1,6}\s|>|```|\d+[.)]\s|[-*+]\s)/.test(lines[i])) {
+      buf.push(lines[i]); i++;
+    }
+    if (buf.length) out.push(`<p>${inlineMd(buf.join("<br/>"))}</p>`);
+    else { out.push(`<p>${inlineMd(line)}</p>`); i++; }
+  }
+  return out.join("\n");
+}
+
+/* ==========================================================================
+   3. 通用 UI
+   ========================================================================== */
+let toastTimer = null;
+function toast(message, isError = false) {
+  const el = $("toast");
+  el.textContent = message;
+  el.className = "toast show" + (isError ? " error" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = "toast" + (isError ? " error" : ""); }, 4200);
+}
+
+function scrollToBottom(force = false) {
+  const nearBottom = scrollBox.scrollHeight - scrollBox.scrollTop - scrollBox.clientHeight < 220;
+  if (force || nearBottom) scrollBox.scrollTop = scrollBox.scrollHeight;
+}
+
+/* ==========================================================================
+   4. 后端接口
+   ========================================================================== */
+async function apiGet(url) {
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function loadHealth() {
+  try {
+    const data = await apiGet("/api/health");
+    const list = $("statusList");
+    list.innerHTML = "";
+    (data.services || []).forEach((s) => {
+      const row = document.createElement("div");
+      row.className = "status-row";
+      row.title = s.detail || "";
+      row.innerHTML = `<span class="dot ${s.ok ? "ok" : "bad"}"></span>${escapeHtml(s.name)}`;
+      list.appendChild(row);
+    });
+    state.demo = !!data.demo_mode;
+    $("demoToggle").checked = state.demo;
+  } catch (err) {
+    $("statusList").innerHTML = `<div class="status-row"><span class="dot bad"></span>健康检查失败</div>`;
+  }
+}
+
+async function loadSessions() {
+  const box = $("sessions");
+  try {
+    const data = await apiGet("/api/sessions?limit=20");
+    box.innerHTML = "";
+    if (!data.available) {
+      box.innerHTML = `<div style="font-size:12px;color:#6b7f9c;padding:0 8px">历史记录不可用</div>`;
+      return;
+    }
+    if (!data.sessions || !data.sessions.length) {
+      box.innerHTML = `<div style="font-size:12px;color:#6b7f9c;padding:0 8px">暂无历史</div>`;
+      return;
+    }
+    data.sessions.forEach((s) => {
+      const btn = document.createElement("button");
+      btn.className = "session";
+      btn.textContent = s.question || s.session_id;
+      btn.title = `${s.created_at}\n${s.session_id}`;
+      btn.onclick = () => loadSession(s.session_id);
+      box.appendChild(btn);
+    });
+  } catch (err) {
+    box.innerHTML = `<div style="font-size:12px;color:#6b7f9c;padding:0 8px">加载失败</div>`;
+  }
+}
+
+async function loadSession(sessionId) {
+  try {
+    const data = await apiGet(`/api/sessions/${encodeURIComponent(sessionId)}`);
+    const items = data.items || [];
+    if (!items.length) { toast("该会话没有可展示的记录"); return; }
+
+    resetView(false);
+    state.sessionId = sessionId;
+    $("sessionPill").textContent = sessionId;
+
+    items.forEach((item) => {
+      const content = item.content || [];
+      const user = content.find((c) => c.role === "user");
+      const ai = content.find((c) => c.role === "ai");
+      if (user) appendUserMessage(user.data || "");
+      if (ai) {
+        const card = createAnswerCard();
+        card.bodyEl.innerHTML = renderMarkdown(ai.data || "");
+        card.stepsEl.style.display = "none";
+        card.evidenceEl.style.display = "none";
+      }
+    });
+    scrollToBottom(true);
+  } catch (err) {
+    toast("读取会话失败：" + err.message, true);
+  }
+}
+
+/* ==========================================================================
+   5. 视图构建
+   ========================================================================== */
+function resetView(clearSession = true) {
+  inner.innerHTML = "";
+  state.evidence = { vector: [], sql: [], web: [] };
+  if (clearSession) {
+    state.sessionId = "";
+    $("sessionPill").textContent = "新会话";
+  }
+}
+
+function appendUserMessage(text) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg user";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble-user";
+  bubble.textContent = text;
+  wrap.appendChild(bubble);
+  inner.appendChild(wrap);
+}
+
+function createAnswerCard() {
+  const wrap = document.createElement("div");
+  wrap.className = "msg";
+
+  const card = document.createElement("div");
+  card.className = "card-answer";
+
+  // --- 步骤条 ---
+  const stepsWrap = document.createElement("div");
+  stepsWrap.className = "steps-wrap";
+  const stepsEl = document.createElement("div");
+  stepsEl.className = "steps";
+  stepsWrap.appendChild(stepsEl);
+  card.appendChild(stepsWrap);
+
+  // --- 正文 ---
+  const bodyEl = document.createElement("div");
+  bodyEl.className = "answer-body";
+  card.appendChild(bodyEl);
+
+  // --- 警告条 ---
+  const warnEl = document.createElement("div");
+  warnEl.style.padding = "0 24px";
+  card.appendChild(warnEl);
+
+  // --- 证据面板 ---
+  const evidenceEl = document.createElement("div");
+  evidenceEl.className = "evidence";
+  evidenceEl.innerHTML = `
+    <div class="ev-head"><span class="chev">▶</span> 证据溯源 <span style="font-weight:400;color:var(--ink-3)" class="ev-count"></span></div>
+    <div class="ev-body">
+      <div class="tabs"></div>
+      <div class="ev-list"></div>
+    </div>`;
+  card.appendChild(evidenceEl);
+
+  // --- 底部 ---
+  const foot = document.createElement("div");
+  foot.className = "answer-foot";
+  foot.innerHTML = `
+    <div class="foot-meta">
+      <span class="m-time">—</span>
+      <span class="m-chars">—</span>
+      <span class="m-mode"></span>
+    </div>
+    <div class="foot-actions">
+      <a class="btn dl" style="display:none" download>下载 .md</a>
+      <button class="btn copy">复制报告</button>
+    </div>`;
+  card.appendChild(foot);
+
+  wrap.appendChild(card);
+  inner.appendChild(wrap);
+
+  const steps = new Map();
+
+  const api = {
+    el: card,
+    bodyEl,
+    stepsEl,
+    stepsWrap,
+    evidenceEl,
+    warnEl,
+    card,
+    setStages(stageDefs) {
+      stepsEl.innerHTML = "";
+      steps.clear();
+      stageDefs.forEach((def, index) => {
+        const node = document.createElement("div");
+        node.className = "step";
+        node.innerHTML = `
+          <div class="step-dot">${index + 1}</div>
+          <div style="min-width:0">
+            <div class="step-name">${escapeHtml(def.name)}</div>
+            <div class="step-detail">${escapeHtml(def.desc || "")}</div>
+          </div>`;
+        stepsEl.appendChild(node);
+        steps.set(def.key, node);
+      });
+    },
+    updateStage(key, status, detail, elapsedMs) {
+      const node = steps.get(key);
+      if (!node) return;
+      node.className = `step ${status}`;
+      const dot = node.querySelector(".step-dot");
+      dot.textContent = status === "done" ? "✓" : status === "error" ? "✕" : (status === "skip" ? "–" : "•");
+      if (detail) node.querySelector(".step-detail").textContent = detail;
+      if (elapsedMs) {
+        const nameEl = node.querySelector(".step-name");
+        nameEl.dataset.ms = elapsedMs;
+      }
+    },
+    renderEvidence() {
+      const ev = state.evidence;
+      const count = ev.vector.length + ev.sql.length + ev.web.length;
+      evidenceEl.style.display = count ? "" : "none";
+      if (!count) return;
+      evidenceEl.querySelector(".ev-count").textContent = `（${count} 条）`;
+
+      const tabs = evidenceEl.querySelector(".tabs");
+      const list = evidenceEl.querySelector(".ev-list");
+      const defs = [
+        { key: "vector", label: "故障码知识", items: ev.vector },
+        { key: "sql", label: "投诉案例", items: ev.sql },
+        { key: "web", label: "网络信息", items: ev.web }
+      ];
+      tabs.innerHTML = defs.map((d) =>
+        `<button class="tab ${state.activeTab === d.key ? "active" : ""}" data-tab="${d.key}">
+           ${d.label}<span class="cnt">${d.items.length}</span>
+         </button>`).join("");
+
+      tabs.querySelectorAll(".tab").forEach((btn) => {
+        btn.onclick = () => { state.activeTab = btn.dataset.tab; api.renderEvidence(); };
+      });
+
+      const active = defs.find((d) => d.key === state.activeTab) || defs[0];
+      if (!active.items.length) {
+        list.innerHTML = `<div class="empty-hint">该维度暂无证据</div>`;
+        return;
+      }
+      list.innerHTML = active.items.map((item) => renderEvidenceItem(active.key, item)).join("");
+    }
+  };
+
+  // 复制 / 下载
+  foot.querySelector(".copy").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(api.raw || api.bodyEl.innerText);
+      toast("已复制到剪贴板");
+    } catch (err) { toast("复制失败，请手动选择文本", true); }
+  };
+
+  // 证据面板折叠
+  evidenceEl.querySelector(".ev-head").onclick = () => evidenceEl.classList.toggle("open");
+
+  return api;
+}
+
+function renderEvidenceItem(kind, item) {
+  if (kind === "vector") {
+    const score = (typeof item.score === "number") ? `<span class="score">${item.score.toFixed(3)}</span>` : "";
+    const tags = (item.affected_components || []).slice(0, 6).map((c) => `<span class="tag">${escapeHtml(c)}</span>`).join(" ");
+    const kv = [
+      item.symptoms ? `<div><b>症状</b>：${escapeHtml(item.symptoms)}</div>` : "",
+      item.common_causes ? `<div><b>常见原因</b>：${escapeHtml(item.common_causes)}</div>` : "",
+      item.repair ? `<div><b>维修</b>：${escapeHtml(item.repair)}</div>` : ""
+    ].join("");
+    return `<div class="ev-item">
+      <div class="ev-title"><code style="font-size:12px">${escapeHtml(item.code || "—")}</code>${escapeHtml(item.category || "")}${score}</div>
+      <div class="ev-meta">${tags}</div>
+      <div class="ev-kv">${kv}</div>
+    </div>`;
+  }
+  if (kind === "sql") {
+    const score = (typeof item.match_score === "number") ? `<span class="score">匹配 ${item.match_score.toFixed(3)}</span>` : "";
+    return `<div class="ev-item">
+      <div class="ev-title">${escapeHtml(item.brand || "")} ${escapeHtml(item.car_model || "")}${score}</div>
+      <div class="ev-meta">${escapeHtml(item.typical_problem || "")}</div>
+      <div class="ev-text">${escapeHtml(item.problem_desc || "")}</div>
+    </div>`;
+  }
+  const link = item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">原文</a>` : "";
+  return `<div class="ev-item">
+    <div class="ev-title">${escapeHtml(item.title || "（无标题）")}</div>
+    <div class="ev-meta">检索词：${escapeHtml(item.keyword || "")} ${link}</div>
+    <div class="ev-text">${escapeHtml((item.content || "").slice(0, 260))}${(item.content || "").length > 260 ? "…" : ""}</div>
+  </div>`;
+}
+
+/* ==========================================================================
+   6. SSE 流式请求
+   注意：EventSource 只支持 GET，这里用 fetch + ReadableStream 读 text/event-stream，
+        协议完全一样，只是可以带 JSON body。
+   ========================================================================== */
+async function streamDiagnosis(query) {
+  if (state.streaming) return;
+  state.streaming = true;
+  $("send").disabled = true;
+
+  if ($("hero")) $("hero").remove();
+  appendUserMessage(query);
+
+  const card = createAnswerCard();
+  card.setStages([
+    { key: "split", name: "语义切分", desc: "准备中" },
+    { key: "retrieve", name: "双路检索", desc: "准备中" },
+    { key: "rerank", name: "证据重排", desc: "等待" },
+    { key: "web", name: "网络检索", desc: "等待" },
+    { key: "fuse", name: "证据融合", desc: "等待" },
+    { key: "answer", name: "生成报告", desc: "等待" }
+  ]);
+  scrollToBottom(true);
+
+  let raw = "";
+  let pending = false;
+  let finished = false;
+
+  const paint = () => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => {
+      pending = false;
+      card.bodyEl.innerHTML = renderMarkdown(raw) + (finished ? "" : '<span class="caret"></span>');
+    });
+  };
+
+  try {
+    const res = await fetch("/api/chat/stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify({ query, session_id: state.sessionId, demo: state.demo })
+    });
+
+    if (!res.ok || !res.body) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+
+    const handleFrame = (frameText) => {
+      const lines = frameText.split("\n");
+      let eventName = "message";
+      const dataLines = [];
+      for (const line of lines) {
+        if (!line || line.startsWith(":")) continue;    // 空行 / 心跳注释
+        if (line.startsWith("event:")) eventName = line.slice(6).trim();
+        else if (line.startsWith("data:")) dataLines.push(line.slice(5).replace(/^ /, ""));
+      }
+      if (!dataLines.length) return;
+      let payload;
+      try { payload = JSON.parse(dataLines.join("\n")); } catch (e) { return; }
+
+      switch (eventName) {
+        case "session": {
+          state.sessionId = payload.session_id || "";
+          $("sessionPill").textContent = state.sessionId ? `会话 ${state.sessionId}` : "新会话";
+          if (payload.stages && payload.stages.length) card.setStages(payload.stages);
+          card.updateStage("split", "running", "抽取关键词…");
+          break;
+        }
+        case "stage": {
+          card.updateStage(payload.key, payload.status, payload.detail, payload.elapsed_ms);
+          if (payload.status === "done" && payload.key === "retrieve") {
+            scrollToBottom();
+          }
+          break;
+        }
+        case "evidence": {
+          state.evidence = {
+            vector: payload.vector || [],
+            sql: payload.sql || [],
+            web: payload.web || []
+          };
+          card.renderEvidence();
+          break;
+        }
+        case "token": {
+          raw += payload.text || "";
+          paint();
+          scrollToBottom();
+          break;
+        }
+        case "done": {
+          finished = true;
+          card.raw = raw;
+          card.bodyEl.innerHTML = renderMarkdown(raw);
+          const meta = card.el.querySelector(".foot-meta");
+          meta.querySelector(".m-time").textContent = `耗时 ${(payload.elapsed_ms / 1000).toFixed(1)}s`;
+          meta.querySelector(".m-chars").textContent = `${payload.chars || raw.length} 字`;
+          meta.querySelector(".m-mode").textContent = payload.demo ? "演示模式" : "真实链路";
+
+          if (payload.warnings && payload.warnings.length) {
+            card.warnEl.innerHTML = `<div class="warn-banner">${payload.warnings.map(escapeHtml).join("<br/>")}</div>`;
+          }
+
+          if (payload.md_name) {
+            const link = card.el.querySelector(".dl");
+            link.href = `/api/reports/${encodeURIComponent(payload.md_name)}`;
+            link.style.display = "";
+            link.setAttribute("download", payload.md_name);
+          }
+          loadSessions();
+          break;
+        }
+        case "error": {
+          card.warnEl.innerHTML = `<div class="warn-banner">${escapeHtml(payload.message || "未知错误")}</div>`;
+          toast(payload.message || "诊断失败", true);
+          break;
+        }
+      }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+      let index;
+      while ((index = buffer.indexOf("\n\n")) >= 0) {
+        const frame = buffer.slice(0, index);
+        buffer = buffer.slice(index + 2);
+        if (frame.trim()) handleFrame(frame);
+      }
+    }
+
+    if (!finished) {
+      // 流结束了但没收到 done（例如网络中断）
+      card.bodyEl.innerHTML = renderMarkdown(raw);
+      card.warnEl.innerHTML = `<div class="warn-banner">连接提前结束，回答可能不完整</div>`;
+    }
+  } catch (err) {
+    card.bodyEl.innerHTML = renderMarkdown(raw);
+    card.warnEl.innerHTML = `<div class="warn-banner">请求失败：${escapeHtml(err.message)}</div>`;
+    toast("请求失败：" + err.message, true);
+  } finally {
+    state.streaming = false;
+    $("send").disabled = false;
+    $("input").focus();
+    scrollToBottom();
+  }
+}
+
+/* ==========================================================================
+   7. 事件绑定
+   ========================================================================== */
+function submit() {
+  const input = $("input");
+  const query = input.value.trim();
+  if (!query) { toast("请先描述一下故障现象"); return; }
+  if (query.length < 2) { toast("描述太短了，再多说一点"); return; }
+  input.value = "";
+  input.style.height = "auto";
+  streamDiagnosis(query);
+}
+
+$("send").onclick = submit;
+
+$("input").addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); submit(); }
+});
+
+$("input").addEventListener("input", (e) => {
+  const el = e.target;
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 168) + "px";
+});
+
+$("newChat").onclick = () => {
+  resetView();
+  $("sessionPill").textContent = "新会话";
+  renderHero();
+  $("input").focus();
+};
+
+$("demoToggle").onchange = (e) => {
+  state.demo = e.target.checked;
+  toast(state.demo ? "已切换为演示模式：使用内置样例数据" : "已切换为真实链路");
+};
+
+/* ==========================================================================
+   8. 初始化
+   ========================================================================== */
+function renderHero() {
+  const hero = document.createElement("div");
+  hero.id = "hero";
+  hero.innerHTML = `
+    <div class="hero">
+      <div class="hero-badge"><span class="dot ok"></span> 三路证据 · 可溯源诊断</div>
+      <h2>用一句话描述故障，<em>拿到可溯源的诊断报告</em></h2>
+      <p>系统会同时检索 <b>OBD 故障码知识库</b>、<b>同车型投诉案例库</b> 和 <b>公开网络信息</b>，
+         再由大模型融合成一份带证据来源、检查步骤和维修建议的报告。</p>
+      <div class="cards" id="heroCards"></div>
+    </div>`;
+  inner.appendChild(hero);
+  renderHeroCards();
+}
+
+function renderHeroCards() {
+  const box = $("heroCards");
+  if (!box) return;
+  const cards = [
+    { icon: "🧩", title: "三路证据融合", text: "故障码知识 + 投诉案例 + 网络信息，结论可追到出处" },
+    { icon: "⚙️", title: "可控工作流", text: "固定五阶段编排，不靠模型自由发挥，结果可复现" },
+    { icon: "📄", title: "一键导出", text: "生成 Markdown 诊断报告，可直接归档或发给修理厂" }
+  ];
+  box.innerHTML = cards.map((c) => `
+    <div class="card">
+      <div class="card-icon">${c.icon}</div>
+      <b>${c.title}</b>
+      <span>${c.text}</span>
+    </div>`).join("");
+}
+
+function renderExamples() {
+  const box = $("examples");
+  box.innerHTML = "";
+  state.examples.forEach((text) => {
+    const btn = document.createElement("button");
+    btn.className = "example";
+    btn.textContent = text;
+    btn.onclick = () => {
+      if (state.streaming) { toast("正在诊断中，请稍候"); return; }
+      resetView();
+      renderHero();
+      streamDiagnosis(text);
+    };
+    box.appendChild(btn);
+  });
+}
+
+renderExamples();
+renderHeroCards();
+loadHealth();
+loadSessions();
+setInterval(loadHealth, 60000);
+</script>
+</body>
+</html>
