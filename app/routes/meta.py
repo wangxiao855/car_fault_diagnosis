@@ -1,14 +1,12 @@
 """
-元信息接口：健康检查、会话历史
+健康检查、会话历史
 """
 from __future__ import annotations
-
 import asyncio
 import socket
 from urllib.parse import urlparse
 
 from fastapi import APIRouter
-
 from app.pipeline import STAGES
 from app.schemas import (
     HealthResponse,
@@ -22,16 +20,9 @@ from config.configs_setting import get_settings
 
 router = APIRouter(prefix="/api", tags=["元信息"])
 
-APP_VERSION = "1.0.0"
-
-
-# ---------------------------------------------------------------------------
-# 工具：从连接串里抠出 host/port 做 TCP 探活
-# ---------------------------------------------------------------------------
 def _parse_host_port(url: str, default_port: int) -> tuple[str, int]:
     if not url:
         return "", 0
-    # SQLAlchemy 的 DSN（mysql+aiomysql://user:pass@host:port/db）urlparse 也能解析
     parsed = urlparse(url)
     host = parsed.hostname or "localhost"
     port = parsed.port or default_port
@@ -58,8 +49,6 @@ async def _tcp_probe(url: str, default_port: int) -> tuple[bool, str]:
 async def health():
     """
     检查各个外部依赖的连通性。
-
-    只做 TCP 探活，不真正发业务请求 —— 健康检查必须快且无副作用。
     """
     settings = get_settings()
 
@@ -71,9 +60,9 @@ async def health():
     tavily_configured = bool(settings.TAVILY_APIKEY)
 
     services = [
-        ServiceStatus(name="MySQL（投诉库）", ok=mysql_ok, detail=mysql_detail),
-        ServiceStatus(name="Milvus（故障码向量库）", ok=milvus_ok, detail=milvus_detail),
-        ServiceStatus(name="MongoDB（历史记录）", ok=mongo_ok, detail=mongo_detail),
+        ServiceStatus(name="MySQL", ok=mysql_ok, detail=mysql_detail),
+        ServiceStatus(name="Milvus", ok=milvus_ok, detail=milvus_detail),
+        ServiceStatus(name="MongoDB", ok=mongo_ok, detail=mongo_detail),
         ServiceStatus(
             name="大模型",
             ok=llm_configured,
@@ -90,23 +79,19 @@ async def health():
     return HealthResponse(
         ok=True,
         demo_mode=settings.DEMO_MODE,
-        version=APP_VERSION,
         services=services,
     )
 
-
-# 运行期真正需要的第三方包（缺了不会 500，但对应能力会静默降级）
 REQUIRED_PACKAGES = {
-    "aiomysql": "MySQL 异步驱动（缺了投诉库检索不可用）",
-    "pymongo": "MongoDB 驱动（缺了历史会话不可用）",
-    "tavily": "Tavily 检索（缺了网络证据不可用）",
-    "pymilvus": "Milvus 客户端（缺了向量检索不可用）",
-    "FlagEmbedding": "bge-reranker（缺了重排降级为不重排）",
+    "aiomysql": "MySQL 异步驱动",
+    "pymongo": "MongoDB 驱动",
+    "tavily": "Tavily 检索",
+    "pymilvus": "Milvus 客户端",
+    "FlagEmbedding": "bge-reranker",
 }
 
 
 def _python_deps_status() -> ServiceStatus:
-    """检查关键第三方包是否装了 —— 缺包时链路会「静默降级」，必须让用户看得见。"""
     import importlib.util
 
     missing = [
@@ -121,16 +106,14 @@ def _python_deps_status() -> ServiceStatus:
 
 @router.get("/stages", summary="诊断阶段定义")
 async def stages():
-    """前端据此渲染步骤条（后端改了阶段，前端不用跟着改）。"""
     return {"stages": STAGES}
 
 
 @router.get("/sessions", response_model=SessionListResponse, summary="历史会话列表")
 async def list_sessions(limit: int = 30):
-    """从 MongoDB 读历史会话；Mongo 没起来时返回空列表而不是报错。"""
+    """从 MongoDB 读历史会话"""
     try:
         from client.mongodb_utils import list_sessions_mongodb
-
         rows = await asyncio.wait_for(
             asyncio.to_thread(list_sessions_mongodb, limit), timeout=4
         )

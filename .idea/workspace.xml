@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9a435f10-09b0-474c-a119-12290fc754c0" name="Changes" comment="333">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/car_fault_agent.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/sql_search/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/sql_search/mysql_insert.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/sql_search/mysql_search.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/start_search.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/vector_search/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/vector_search/milves_insert.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/database_agents/vector_search/milvus_search.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/internet_agent/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/internet_agent/internet_search/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/internet_agent/internet_search/tavily_search.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/merge_agent/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/merge_agent/fusion_vector_and_sql.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/node/fusion_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/node/rerank_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/node/split_to_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agent/state.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/embedding_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/llm_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/milvus_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/mongodb_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/pub_sub.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/rerank_client.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/tavily_client.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/to_md_client.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/configs_setting.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logger_set/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logger_set/logger_object.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prompt/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prompt/prompt_document/answer_prompt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prompt/prompt_util.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/REVIEW.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent/answer.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent/answer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent/merge_agent/fusion_handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent/merge_agent/fusion_handlers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/demo_data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/pipeline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/chat.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/meta.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/meta.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/reports.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/sse.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/sse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sql_data/投诉内容.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sql_data/汽车类型.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/check_mysql.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/frontend_check.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_core.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tools/convert_bge_m3_to_safetensors.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="3KdBnz56aro6GPnw9b6WSg0WlPq" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.111.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bench_pipeline.executor&quot;: &quot;Run&quot;,
+    &quot;Python.configs_setting.executor&quot;: &quot;Run&quot;,
+    &quot;Python.eval_retrieval.executor&quot;: &quot;Run&quot;,
+    &quot;Python.llm_client.executor&quot;: &quot;Run&quot;,
+    &quot;Python.llm_utils (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.llm_utils.executor&quot;: &quot;Run&quot;,
+    &quot;Python.logger_object.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.merge (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.merge.executor&quot;: &quot;Run&quot;,
+    &quot;Python.milves_insert.executor&quot;: &quot;Run&quot;,
+    &quot;Python.milvus_client.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mysql_insert.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mysql_search.executor&quot;: &quot;Run&quot;,
+    &quot;Python.prompt_util.executor&quot;: &quot;Run&quot;,
+    &quot;Python.splitter_node.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tavily_search.executor&quot;: &quot;Run&quot;,
+    &quot;Python.text.executor&quot;: &quot;Run&quot;,
+    &quot;Python.to_md_client.executor&quot;: &quot;Run&quot;,
+    &quot;Python.yaml-list.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/python/car_fault_agent/data/sql_data&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.language.and.region&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\python\car_fault_agent\data\sql_data" />
+      <recent name="D:\python\car_fault_agent\data\vector_data" />
+      <recent name="D:\python\car_fault_agent\111\222" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\python\car_fault_agent\agent" />
+      <recent name="D:\python\car_fault_agent\agent\database_agents" />
+      <recent name="D:\python\car_fault_agent\data\vector_data" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.main (1)">
+    <configuration name="111" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="car_fault_agent" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/111.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="bench_pipeline" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="car_fault_agent" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/bench_pipeline.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="eval_retrieval" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="car_fault_agent" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/eval_retrieval.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="car_fault_agent" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="car_fault_agent" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="milves_insert" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="car_fault_agent" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/agent/database_agents/vector_search" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/agent/database_agents/vector_search/milves_insert.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.main (1)" />
+        <item itemvalue="Python.111" />
+        <item itemvalue="Python.milves_insert" />
+        <item itemvalue="Python.eval_retrieval" />
+        <item itemvalue="Python.bench_pipeline" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-d7ad00fb9fc3-c546a90a8094-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.23726.102" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9a435f10-09b0-474c-a119-12290fc754c0" name="Changes" comment="" />
+      <created>1791877736144</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1791877736144</updated>
+    </task>
+    <task id="LOCAL-00001" summary="222">
+      <option name="closed" value="true" />
+      <created>1792397784387</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1792397784387</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="111" />
+    <MESSAGE value="222" />
+    <option name="LAST_COMMIT_MESSAGE" value="222" />
+  </component>
+</project>
