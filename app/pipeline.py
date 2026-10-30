@@ -1,5 +1,5 @@
 """
-诊断流水线（API 层编排）
+诊断流水线
 """
 from __future__ import annotations
 
@@ -132,7 +132,7 @@ async def _run(query: str, session_id: str, timer: StageTimer) -> AsyncIterator[
     except Exception as exc:
         keywords = []
         warnings.append(f"关键词抽取失败：{exc}")
-        logger.error(f"关键词抽取失败：{exc}", exc_info=True)
+        logger.opt(exception=True).error(f"关键词抽取失败：{exc}")
     yield "stage", {
         "key": "split",
         "status": "done" if keywords else "error",
@@ -156,7 +156,7 @@ async def _run(query: str, session_id: str, timer: StageTimer) -> AsyncIterator[
         )
     except Exception as exc:
         warnings.append(f"双路检索失败：{exc}")
-        logger.error(f"双路检索失败：{exc}", exc_info=True)
+        logger.opt(exception=True).error(f"双路检索失败：{exc}")
 
     yield "stage", {
         "key": "retrieve",
@@ -184,7 +184,7 @@ async def _run(query: str, session_id: str, timer: StageTimer) -> AsyncIterator[
             sql_search = state.get("sql_search") or []
         except Exception as exc:
             warnings.append(f"证据重排失败：{exc}")
-            logger.error(f"证据重排失败：{exc}", exc_info=True)
+            logger.opt(exception=True).error(f"证据重排失败：{exc}")
         yield "stage", {
             "key": "rerank",
             "status": "done",
@@ -213,7 +213,7 @@ async def _run(query: str, session_id: str, timer: StageTimer) -> AsyncIterator[
     except Exception as exc:
         databases_search = []
         warnings.append(f"证据生产失败：{exc}")
-        logger.error(f"证据生产失败：{exc}", exc_info=True)
+        logger.opt(exception=True).error(f"证据生产失败：{exc}")
 
     web_count = sum(len(section.get("结果") or []) for section in internet_search or [])
     yield "stage", {
@@ -242,7 +242,7 @@ async def _run(query: str, session_id: str, timer: StageTimer) -> AsyncIterator[
             yield "token", {"text": token}
     except Exception as exc:
         message = str(exc)
-        logger.error(f"大模型生成失败：{message}", exc_info=True)
+        logger.opt(exception=True).error(f"大模型生成失败：{message}")
         yield "stage", {"key": "answer", "status": "error", "elapsed_ms": timer.end("answer"),
                         "detail": f"生成失败：{message}"}
         yield "error", {"stage": "answer", "message": f"大模型调用失败：{message}"}
@@ -289,7 +289,7 @@ async def run_diagnosis(
         logger.info(f"客户端断开，诊断中止（session={session_id}）")
         raise
     except Exception as exc:
-        logger.error(f"诊断流水线异常：{exc}", exc_info=True)
+        logger.opt(exception=True).error(f"诊断流水线异常：{exc}")
         yield "error", {"stage": "pipeline", "message": f"诊断失败：{exc}"}
 
 

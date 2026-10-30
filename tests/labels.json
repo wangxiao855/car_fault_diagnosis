@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "complaint_id": "1800539",
+    "query": "安徽大众与众07雨刮控制逻辑异常",
+    "car_hint": "大众 与众07 2026款 Pure SE",
+    "typical_problem": "车身附件及电器雨刮器故障",
+    "expected_codes": ["B0900", "B0192"],
+    "family": "雨刮",
+    "note": "雨刮不按档位动作 → 前雨刮电机电路 / 转速性能"
+  },
+  {
+    "id": 2,
+    "complaint_id": "1800534",
+    "query": "广汽丰田锋兰达空调压缩机漏油",
+    "car_hint": "丰田 锋兰达 2024款 2.0L CVT 精英版",
+    "typical_problem": "车身附件及电器空调问题",
+    "expected_codes": ["B0292", "B0288"],
+    "family": "空调",
+    "note": "压缩机漏油 → 离合器电路异常 + 制冷剂压力丢失（压力传感器）"
+  },
+  {
+    "id": 3,
+    "complaint_id": "1800520",
+    "query": "比亚迪元UP刹车抱死 中控照明灯不灵",
+    "car_hint": "比亚迪 元UP 2025款 智驾版 401KM 活力版",
+    "typical_problem": "制动系统刹车失灵车身附件及电器车灯不亮",
+    "expected_codes": ["B0260", "B0970"],
+    "family": "车内照明",
+    "note": "取可诊断的「中控照明灯不灵」；「刹车抱死」属机械拖滞，无对应 DTC，故不标"
+  },
+  {
+    "id": 4,
+    "complaint_id": "1800478",
+    "query": "广汽本田雅阁蒸发箱渗漏导致空调不冷",
+    "car_hint": "本田 雅阁 2018款 2.0L 锐领版 锐·混动 国VI",
+    "typical_problem": "车身附件及电器空调问题",
+    "expected_codes": ["B0288"],
+    "family": "空调",
+    "note": "蒸发箱渗漏 → 制冷剂压力异常 → HVAC 空调压力传感器电路"
+  },
+  {
+    "id": 5,
+    "complaint_id": "1800463",
+    "query": "一汽红旗HS3 PHEV车机转向灯故障",
+    "car_hint": "红旗 HS3 PHEV 2025款 125km 劲为PLUS",
+    "typical_problem": "车身附件及电器车灯不亮",
+    "expected_codes": ["B0830", "B0831", "B0840", "B0841"],
+    "family": "灯光",
+    "note": "未说明哪一只转向灯，四条转向灯电路都算合理目标"
+  },
+  {
+    "id": 6,
+    "complaint_id": "1800427",
+    "query": "北京越野BJ40增程自动泊车功能失灵",
+    "car_hint": "北京越野 BJ40增程 2025款 元境智行版",
+    "typical_problem": "车身附件及电器驾驶辅助系统故障",
+    "expected_codes": ["C0620"],
+    "family": "泊车辅助",
+    "note": "自动泊车不可用 → 泊车辅助模块通信故障"
+  },
+  {
+    "id": 7,
+    "complaint_id": "1800373",
+    "query": "长安欧尚Z6大灯外壳自然开裂导致不亮",
+    "car_hint": "长安欧尚 Z6 2023款 蓝鲸 1.5T DCT 智领型",
+    "typical_problem": "车身附件及电器灯罩裂纹或变形",
+    "expected_codes": ["B0810", "B0811"],
+    "family": "灯光",
+    "note": "大灯不亮 → 左/右前照灯近光电路（外壳开裂是诱因，非 DTC）"
+  },
+  {
+    "id": 8,
+    "complaint_id": "1800334",
+    "query": "蔚来ES9新车车门打不开 无法熄火 车机黑屏",
+    "car_hint": "蔚来 ES9 2026款 102kWh 行政中岛签名版",
+    "typical_problem": "车身附件及电器车机系统问题车身附件及电器电路故障车身附件及电器车门故障",
+    "expected_codes": ["B0510", "B0530", "B0490"],
+    "family": "车门+显示",
+    "note": "多症状样本：车门打不开（开启开关/锁执行器）+ 车机黑屏（显示屏背光）"
+  },
+  {
+    "id": 9,
+    "complaint_id": "1800302",
+    "query": "埃安AION Y充电时空调不制冷压缩机异响",
+    "car_hint": "埃安 AION Y 2023款 Plus 80 智领版",
+    "typical_problem": "车身附件及电器空调问题",
+    "expected_codes": ["B0292", "B0288"],
+    "family": "空调",
+    "note": "充电工况下压缩机异常 → 离合器电路 + 压力传感器"
+  },
+  {
+    "id": 10,
+    "complaint_id": "1800295",
+    "query": "长安CS55 PLUS空调不制冷 维修未解决",
+    "car_hint": "长安 CS55 PLUS 2022款 第二代 1.5T DCT 尊享型",
+    "typical_problem": "车身附件及电器空调问题",
+    "expected_codes": ["B0288", "B0168"],
+    "family": "空调",
+    "note": "不制冷两大成因：制冷剂压力异常 / 混合风门卡滞"
+  },
+  {
+    "id": 11,
+    "complaint_id": "1800252",
+    "query": "东风本田杰德仪表盘存在闪屏乱码黑屏",
+    "car_hint": "本田 杰德 2016款 1.8L 自动 舒适精英版",
+    "typical_problem": "车身附件及电器仪表故障",
+    "expected_codes": ["B0490"],
+    "family": "显示",
+    "note": "仪表显示异常 → 显示屏背光电路"
+  },
+  {
+    "id": 12,
+    "complaint_id": "1800238",
+    "query": "奇瑞风云T11尾灯进水 车门开关碰撞",
+    "car_hint": "奇瑞 风云T11 2026款 220后驱伯牙巨幕奢享版",
+    "typical_problem": "车身附件及电器车灯进水车身附件及电器部件异常磨损",
+    "expected_codes": ["B0233"],
+    "family": "灯光",
+    "note": "尾灯进水 → 后尾灯电路（短路/接地不良）"
+  },
+  {
+    "id": 13,
+    "complaint_id": "1800216",
+    "query": "一汽大众探岳出售库存车 玻璃升降异常",
+    "car_hint": "大众 探岳 2025款 探岳L 330TSI 两驱 精英City包",
+    "typical_problem": "车身附件及电器电瓶故障车身附件及电器仪表故障车身附件及电器车窗升降故障",
+    "expected_codes": ["B0245", "B0500"],
+    "family": "车窗",
+    "note": "车窗升降失效 → 车窗开关电路 / 驾驶员电动车窗电路（「库存车」是噪声）"
+  },
+  {
+    "id": 14,
+    "complaint_id": "1800171",
+    "query": "一汽奥迪A4L蒸发箱故障导致空调不制冷",
+    "car_hint": "奥迪 A4L 2024款 40 TFSI 时尚动感型",
+    "typical_problem": "车身附件及电器空调问题",
+    "expected_codes": ["B0288"],
+    "family": "空调",
+    "note": "与 id=4 同类，但车型与表述不同，用于检验跨车型泛化"
+  },
+  {
+    "id": 15,
+    "complaint_id": "1800161",
+    "query": "北京奔驰EQE转向抱死油门失灵座椅破损",
+    "car_hint": "奔驰 EQE 2022款 350 先型特别版",
+    "typical_problem": "发动机/电动机油门故障转向系统失灵车身附件及电器座椅故障",
+    "expected_codes": ["C061C", "C0527"],
+    "family": "转向",
+    "note": "转向抱死 → 可变助力转向执行器断路 / 转向角传感器模块机械故障（「座椅破损」是外观，不标）"
+  },
+  {
+    "id": 16,
+    "complaint_id": "1799799",
+    "query": "吉利缤越中控锁故障 主驾驶车门偶尔打不开",
+    "car_hint": "吉利 缤越 2020款 PRO 240T DCT 猎手",
+    "typical_problem": "车身附件及电器中控锁故障车身附件及电器车门故障",
+    "expected_codes": ["B0265", "B0530"],
+    "family": "车门锁",
+    "note": "中控锁失灵 + 单侧门偶发打不开 → 门锁/解锁开关 + 驾驶员门锁执行器"
+  },
+  {
+    "id": 17,
+    "complaint_id": "1799768",
+    "query": "长安CS55 PLUS车辆遮阳帘无法关闭",
+    "car_hint": "长安 CS55 PLUS 2022款 第二代 1.5T DCT 尊贵型",
+    "typical_problem": "车身附件及电器天窗开关异常",
+    "expected_codes": ["B0700", "B0710"],
+    "family": "天窗",
+    "note": "遮阳帘与天窗共用驱动，按天窗开关电路 / 位置传感器标注"
+  },
+  {
+    "id": 18,
+    "complaint_id": "1799901",
+    "query": "长安UNI-V主驾隐藏式门把手按键失灵",
+    "car_hint": "长安 UNI-V 2022款 1.5T 尊贵型",
+    "typical_problem": "车身附件及电器车门把手故障",
+    "expected_codes": ["B0510"],
+    "family": "车门",
+    "note": "隐藏式门把手按键 → 驾驶员车门开启开关电路"
+  },
+  {
+    "id": 19,
+    "complaint_id": "1799872",
+    "query": "一汽奥迪A3高速行驶转向助力失效",
+    "car_hint": "奥迪 A3 2026款 Sportback 35TFSI",
+    "typical_problem": "转向系统转向机故障",
+    "expected_codes": ["C061C", "C061F", "C0079"],
+    "family": "转向",
+    "note": "高速助力丢失 → 可变助力转向执行器断路/性能 + 可变助力转向总类"
+  },
+  {
+    "id": 20,
+    "complaint_id": "1799850",
+    "query": "一汽奥迪A4L仪表屏幕黑屏 电子元件损坏",
+    "car_hint": "奥迪 A4L 2022款 40 TFSI 时尚动感型",
+    "typical_problem": "车身附件及电器仪表故障",
+    "expected_codes": ["B0490"],
+    "family": "显示",
+    "note": "仪表黑屏 → 显示屏背光电路（与 id=11 同类，用于稳定性检验）"
+  }
+]

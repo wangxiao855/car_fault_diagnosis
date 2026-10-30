@@ -7,6 +7,7 @@ import socket
 from urllib.parse import urlparse
 
 from fastapi import APIRouter
+from app import __version__ as APP_VERSION
 from app.pipeline import STAGES
 from app.schemas import (
     HealthResponse,
@@ -79,6 +80,7 @@ async def health():
     return HealthResponse(
         ok=True,
         demo_mode=settings.DEMO_MODE,
+        version=APP_VERSION,
         services=services,
     )
 

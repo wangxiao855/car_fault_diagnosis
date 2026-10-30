@@ -96,7 +96,7 @@ def persist_answer(answer: str, query: str, session_id: str) -> Path | None:
             add_front_matter=True,
         )
     except Exception as exc:
-        logger.error(f"诊断报告落盘失败：{exc}", exc_info=True)
+        logger.opt(exception=True).error(f"诊断报告落盘失败：{exc}")
     # 保存聊天记录
     try:
         from client.mongodb_utils import save_history_mongodb

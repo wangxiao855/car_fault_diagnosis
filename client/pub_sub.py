@@ -79,7 +79,13 @@ class HandlerResult:
 
 
 def collect_values(results: list[HandlerResult]) -> list[Any]:
-    """取出所有成功的结果并拍平一层（用于把多路证据合成一个列表）。"""
+    """
+    取出所有成功的结果并**拍平一层**。
+
+    ⚠️ 调用方注意：返回值里的元素已经是 handler 返回列表的**成员**，
+    不要再用 `if isinstance(value, list)` 过滤一遍 —— 那样会把每条 dict 证据整体丢掉，
+    表现为「日志显示命中 N 条，final 结果是 0」（真实踩过的坑）。
+    """
     values: list[Any] = []
     for result in results:
         if not result.ok or result.value is None:

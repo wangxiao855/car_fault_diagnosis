@@ -34,11 +34,11 @@ async def fuse_databases_async(
     values, errors = await apub_task_values(
         EVENT_DATABASES_SEARCH, vector_search, sql_search, timeout=timeout
     )#异步的执行发布知识库融合
-    merged: list[dict[str, Any]] = []
-    for value in values:
-        if isinstance(value, list):
-            merged.extend(value)
-    return merged, errors
+    # ⚠️ 注意：apub_task_values -> collect_values 已经**把 handler 返回的 list 拍平了一层**。
+    # 这里千万不要再写 `for value in values: if isinstance(value, list): merged.extend(value)`——
+    # 拍平后每个元素是 dict（一条证据），不是 list，会被整体丢掉，
+    # 表现为「handler 明明返回了数据，最终却是 0 组」。
+    return list(values), errors
 
 #异步的网络检索函数
 async def search_internet_async(
@@ -48,11 +48,8 @@ async def search_internet_async(
     """网络检索"""
     ensure_handlers_registered()
     values, errors = await apub_task_values(EVENT_INTERNET_SEARCH, query, timeout=timeout)
-    merged: list[dict[str, Any]] = []
-    for value in values:
-        if isinstance(value, list):
-            merged.extend(value)
-    return merged, errors
+    # 同上：values 已经是拍平后的证据条目（每个 {"检索词":..., "结果":[...]}），直接透传
+    return list(values), errors
 
 # 广播两个事件的发布
 async def broadcast_evidence_async(vector_search, sql_search, query):

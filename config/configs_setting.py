@@ -43,7 +43,7 @@ class ConfigSet(BaseSettings):
     RERANKER_MAX_GAP: float = Field(0.5, description="断崖最大分数")
     RERANKER_MAX_HUNDRED: float = Field(0.25, description="断崖最大百分数")
     RERANKER_MIN_KEEP: int = Field(
-        3, description="断崖截断后至少保留的条数"
+        5, description="断崖截断后至少保留的条数"
     )
     RERANKER_MIN_SCORE: float = Field(0.3, description="投诉打分的绝对下限")
     RERANKER_SQL_FILTER_RATIO: float = Field(

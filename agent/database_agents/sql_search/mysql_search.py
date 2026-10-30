@@ -53,6 +53,7 @@ class SQL_DATA_01(Base):
     status: Mapped[str] = mapped_column(default="")
 
 
+
 class SQL_DATA_02(Base):
     __tablename__ = "car_fault_02"
     complaint_id: Mapped[int] = mapped_column(primary_key=True)
@@ -100,7 +101,7 @@ async def sql_search(keyword: str) -> list[dict[str, Any]]:
         async with get_session_factory()() as session:
             rows = (await session.execute(sql_sentence)).all()
     except Exception as exc:
-        logger.error(f"投诉库检索失败（keyword={keyword}）：{exc}", exc_info=True)
+        logger.opt(exception=True).error(f"投诉库检索失败（keyword={keyword}）：{exc}")
         return []
 
     for row in rows:
@@ -140,7 +141,7 @@ async def start_sql_search(keyword_list: list[str], query: str) -> list[dict[str
             seen.add(key)
             merged.append(row)
         if not rows:
-            logger.warning(f"关键词{keyword}在投诉库无命中")
+            logger.warning(f"关键词“{keyword}”在投诉库无命中")
 
     logger.info(f"投诉库累计去重后 {len(merged)} 条")
     return merged

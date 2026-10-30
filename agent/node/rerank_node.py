@@ -80,8 +80,7 @@ def cut_topk(
             keep = index + 1
             keep = max(keep, min_keep)
             logger.info(
-                f"检测到分数断崖，在第{keep}条处截断分差 {gap:.4f}"
-                f"候选{len(vector_search)}条，至少保留{min_keep}条）"
+                f"候选{len(vector_search)}条，检测到分数断崖，在第{keep}条处截断分差 {gap:.4f}"
             )
             return vector_search[:keep]
 

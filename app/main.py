@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 from app.routes import chat, meta, reports
+from app import __version__
 from config.configs_setting import get_settings
 from logger_set.logger_object import configure_logger
 
@@ -41,6 +42,7 @@ async def lifespan(app: FastAPI):
 #程序总app
 app = FastAPI(
     title="车辆故障智能诊断系统",
+    version=__version__,
     description=(
         "基于「向量库故障码知识 + 投诉案例库 + 网络公开信息」三路证据融合的汽车故障诊断服务。\n\n"
         "POST /api/chat/stream`：SSE 流式诊断\n"
@@ -67,8 +69,15 @@ app.include_router(meta.router)
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    """兜底异常处理，不把堆栈吐给前端。"""
-    logger.error(f"未处理异常 {request.method} {request.url.path}：{exc}", exc_info=True)
+    """兜底异常处理，不把堆栈吐给前端。
+
+    ⚠️ loguru 不支持 `exc_info=True`（那是标准库 logging 的写法）。
+    写成 `logger.error(msg, exc_info=True)` 时，loguru 会把 `exc_info` 当成 **format 参数**，
+    于是拿消息去做 `.format()` —— 而异常信息里只要带 `{`（pydantic 校验错误就带
+    `input_value={'ok': True, ...}`），就会在这里二次抛出 KeyError，把异常处理器自己打挂。
+    正确写法是 `logger.opt(exception=True)`。
+    """
+    logger.opt(exception=True).error(f"未处理异常 {request.method} {request.url.path}：{exc}")
     return JSONResponse(
         status_code=500,
         content={"detail": f"服务内部错误：{type(exc).__name__}"},

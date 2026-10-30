@@ -99,7 +99,7 @@ async def hybrid_search(
         logger.info(f"Milvus 混合搜索完成，集合[{collection_name}]共检索到 {len(hits)} 条结果")
         return res[0] if res else []
     except Exception as exc:
-        logger.error(f"Milvus 混合搜索执行失败，集合[{collection_name}]：{exc}", exc_info=True)
+        logger.opt(exception=True).error(f"Milvus 混合搜索执行失败，集合[{collection_name}]：{exc}")
         return []
 
 # 向量库检索数据模型
